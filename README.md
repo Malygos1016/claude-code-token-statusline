@@ -119,6 +119,7 @@ To reset today's tally, delete `~/.claude/token_log.jsonl`. To start fresh forev
 - **Cost is USD** as reported by Claude Code's `cost.total_cost_usd` field. The script multiplies by `usd_to_local`.
 - **Fail-safe**: if anything goes wrong (bad stdin, log file write error), the script prints `?` and exits silently. It will never crash your status line.
 - **Cumulative tokens may underestimate** sessions that were `/compact`-ed mid-day, because the `context_window` field reflects current context not lifetime accumulation. The cost field is monotonic and accurate.
+- **Sessions spanning midnight may overestimate "today"**. Aggregation groups by `session_id` and takes the max cost/tokens within today's snapshots. If a session starts at 23:30 and continues past midnight, the post-midnight snapshots carry cumulative-since-session-start, so yesterday's late-night portion is double-counted into today. The error is bounded by what the session burned before midnight; for a session that started fresh after midnight it doesn't apply. A proper fix needs delta-per-snapshot tracking, which is on the roadmap if anyone hits this in practice.
 
 ## License
 
